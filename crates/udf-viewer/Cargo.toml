@@ -1,0 +1,13 @@
+[package]
+name = "udf-viewer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+udf-core = { path = "../udf-core" }
+udf-render = { path = "../udf-render" }
+slint = { version = "1.8", features = ["backend-qt"] }
+rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "async-std"] }
+
+[build-dependencies]
+slint-build = "1.8"

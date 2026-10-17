@@ -1,0 +1,10 @@
+[package]
+name = "udf-render"
+version = "0.1.0"
+edition = "2021"
+description = "UDF belge modelini sayfalara yerleştirir ve RGBA bitmap olarak çizer"
+
+[dependencies]
+udf-core = { path = "../udf-core" }
+fontdb = "0.22"
+fontdue = "0.9"

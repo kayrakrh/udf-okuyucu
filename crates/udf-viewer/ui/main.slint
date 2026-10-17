@@ -1,0 +1,92 @@
+import { ScrollView, ListView, Button, Palette } from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    title: root.doc-title == "" ? "UDF Okuyucu" : root.doc-title + " — UDF Okuyucu";
+    preferred-width: 1000px;
+    preferred-height: 720px;
+    min-width: 480px;
+    min-height: 320px;
+
+    in property <[image]> pages;
+    in property <[image]> thumbs;
+    in property <float> aspect: 1.4142;
+    in property <string> doc-title;
+    in-out property <string> status;
+    in-out property <int> current: 0;
+    callback open-file();
+
+    property <length> sidebar-w: 176px;
+    property <length> page-w: 720px;
+    property <length> page-h: page-w * aspect;
+    property <length> gap: 16px;
+    property <length> thumb-w: 128px;
+    property <length> thumb-h: thumb-w * aspect;
+
+    VerticalLayout {
+        Rectangle {
+            height: 40px;
+            background: Palette.control-background;
+            HorizontalLayout {
+                padding: 6px;
+                spacing: 8px;
+                alignment: start;
+                Button {
+                    text: "Aç…";
+                    clicked => { root.open-file(); }
+                }
+                Text {
+                    vertical-alignment: center;
+                    text: root.status;
+                    color: Palette.foreground;
+                }
+            }
+        }
+
+        HorizontalLayout {
+            // Sol kenar çubuğu: yalnızca sayfa önizlemeleri
+            Rectangle {
+                width: root.sidebar-w;
+                background: Palette.alternate-background;
+                ListView {
+                    for thumb[i] in root.thumbs : Rectangle {
+                        height: root.thumb-h + 36px;
+                        background: i == root.current ? Palette.selection-background : transparent;
+                        TouchArea {
+                            clicked => {
+                                root.current = i;
+                                main.content-y = -(root.gap + i * (root.page-h + root.gap));
+                            }
+                        }
+                        VerticalLayout {
+                            padding: 8px;
+                            spacing: 4px;
+                            Image {
+                                source: thumb;
+                                width: root.thumb-w;
+                                height: root.thumb-h;
+                            }
+                            Text {
+                                text: i + 1;
+                                horizontal-alignment: center;
+                                color: i == root.current ? Palette.selection-foreground : Palette.foreground;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Sürekli kaydırmalı sayfa görünümü
+            main := ScrollView {
+                content-width: max(root.width - root.sidebar-w, root.page-w + 2 * root.gap);
+                content-height: root.pages.length * (root.page-h + root.gap) + root.gap;
+                for page[i] in root.pages : Image {
+                    source: page;
+                    width: root.page-w;
+                    height: root.page-h;
+                    x: (main.content-width - self.width) / 2;
+                    y: root.gap + i * (root.page-h + root.gap);
+                }
+            }
+        }
+    }
+}

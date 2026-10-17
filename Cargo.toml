@@ -1,0 +1,3 @@
+[workspace]
+resolver = "2"
+members = ["crates/udf-core", "crates/udf-render", "crates/udf-viewer"]
