@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=UDF Okuyucu
+Name[en]=UDF Viewer
+GenericName=UYAP Belge Görüntüleyici
+GenericName[en]=UYAP Document Viewer
+Comment=UYAP .udf belgelerini görüntüle
+Comment[en]=View UYAP .udf documents
+Keywords=udf;uyap;evrak;belge;mahkeme;
+Exec=udf-okuyucu %f
+Icon=udf-okuyucu
+Terminal=false
+StartupNotify=true
+StartupWMClass=udf-okuyucu
+Categories=Office;Viewer;Qt;KDE;
+MimeType=application/x-uyap-udf;

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-uyap-udf">
+    <comment>UYAP document</comment>
+    <comment xml:lang="tr">UYAP belgesi</comment>
+    <!-- .udf dosyaları aslında ZIP arşividir -->
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.udf"/>
+  </mime-type>
+</mime-info>
