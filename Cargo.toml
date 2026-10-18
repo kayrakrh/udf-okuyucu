@@ -1,0 +1,17 @@
+[package]
+name = "udf-okuyucu"
+version = "0.1.0"
+edition = "2021"
+description = "UYAP .udf okuyucu (KDE Breeze)"
+
+[dependencies]
+udflib = { path = "../udflib" }
+slint = { version = "1.8", features = ["backend-qt"] }
+rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "async-std"] }
+fontdb = "0.22"
+ttf-parser = "0.25"
+owned_ttf_parser = "0.25"
+tiny-skia = "0.11"
+
+[build-dependencies]
+slint-build = "1.8"

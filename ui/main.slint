@@ -1,0 +1,137 @@
+import { ScrollView, ListView, Button, Palette } from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    title: root.doc-title == "" ? "UDF Okuyucu" : root.doc-title + " — UDF Okuyucu";
+    preferred-width: 1100px;
+    preferred-height: 760px;
+    min-width: 520px;
+    min-height: 360px;
+
+    // Rust tarafından sürülen geometri (mantıksal piksel; zoom ile orantılı)
+    in property <[image]> pages;
+    in property <[image]> thumbs;
+    in property <length> page-w: 794px;
+    in property <length> page-h: 1123px;
+    in property <length> gap: 13px;
+    in property <length> thumb-w: 128px;
+    in property <length> thumb-h: 181px;
+    in property <string> doc-title;
+    in property <string> zoom-text: "100%";
+    in property <string> status;
+    in-out property <int> current: 0;
+    in-out property <length> scroll-x;
+    in-out property <length> scroll-y;
+    out property <length> view-w: main.width;
+    out property <length> view-h: main.height;
+
+    callback open-file();
+    callback goto-page(int);
+    callback zoom-in();
+    callback zoom-out();
+    callback zoom-reset();
+    callback fit-width();
+    callback fit-page();
+    callback zoom-wheel(float, length, length);
+    callback viewport-changed();
+
+    changed scroll-y => { root.viewport-changed(); }
+    changed view-w => { root.viewport-changed(); }
+    changed view-h => { root.viewport-changed(); }
+
+    property <length> sidebar-w: 176px;
+
+    FocusScope {
+        init => { self.focus(); }
+        key-pressed(event) => {
+            if (event.modifiers.control) {
+                if (event.text == "+" || event.text == "=") { root.zoom-in(); return EventResult.accept; }
+                if (event.text == "-") { root.zoom-out(); return EventResult.accept; }
+                if (event.text == "0") { root.zoom-reset(); return EventResult.accept; }
+                if (event.text == "o") { root.open-file(); return EventResult.accept; }
+            }
+            return EventResult.reject;
+        }
+
+        VerticalLayout {
+            Rectangle {
+                height: 40px;
+                background: Palette.control-background;
+                HorizontalLayout {
+                    padding: 6px;
+                    spacing: 6px;
+                    alignment: start;
+                    Button { text: "Aç…"; clicked => { root.open-file(); } }
+                    Button { text: "−"; clicked => { root.zoom-out(); } }
+                    Text { text: root.zoom-text; vertical-alignment: center; horizontal-alignment: center; min-width: 48px; color: Palette.foreground; }
+                    Button { text: "+"; clicked => { root.zoom-in(); } }
+                    Button { text: "%100"; clicked => { root.zoom-reset(); } }
+                    Button { text: "Genişliğe sığdır"; clicked => { root.fit-width(); } }
+                    Button { text: "Sayfaya sığdır"; clicked => { root.fit-page(); } }
+                    Text { text: root.status; vertical-alignment: center; color: Palette.foreground; }
+                }
+            }
+
+            HorizontalLayout {
+                // Sol kenar çubuğu: yalnızca sayfa önizlemeleri
+                Rectangle {
+                    width: root.sidebar-w;
+                    background: Palette.alternate-background;
+                    ListView {
+                        for thumb[i] in root.thumbs : Rectangle {
+                            height: root.thumb-h + 36px;
+                            background: i == root.current ? Palette.selection-background : transparent;
+                            TouchArea { clicked => { root.goto-page(i); } }
+                            VerticalLayout {
+                                padding: 8px;
+                                spacing: 4px;
+                                alignment: start;
+                                Rectangle {
+                                    width: root.thumb-w;
+                                    height: root.thumb-h;
+                                    background: white;
+                                    Image { source: thumb; width: parent.width; height: parent.height; }
+                                }
+                                Text {
+                                    text: i + 1;
+                                    horizontal-alignment: center;
+                                    color: i == root.current ? Palette.selection-foreground : Palette.foreground;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Sürekli kaydırmalı sayfa görünümü
+                main := ScrollView {
+                    content-width: max(self.width, root.page-w + 2 * root.gap);
+                    content-height: root.pages.length * (root.page-h + root.gap) + root.gap;
+                    content-x <=> root.scroll-x;
+                    content-y <=> root.scroll-y;
+
+                    TouchArea {
+                        x: 0px;
+                        y: 0px;
+                        width: main.content-width;
+                        height: main.content-height;
+                        scroll-event(e) => {
+                            if (e.modifiers.control) {
+                                root.zoom-wheel(e.delta-y / 1px, self.mouse-x + root.scroll-x, self.mouse-y + root.scroll-y);
+                                return EventResult.accept;
+                            }
+                            return EventResult.reject;
+                        }
+                    }
+
+                    for page[i] in root.pages : Rectangle {
+                        x: (max(main.width, root.page-w + 2 * root.gap) - root.page-w) / 2;
+                        y: root.gap + i * (root.page-h + root.gap);
+                        width: root.page-w;
+                        height: root.page-h;
+                        background: white;
+                        Image { source: page; width: parent.width; height: parent.height; }
+                    }
+                }
+            }
+        }
+    }
+}
